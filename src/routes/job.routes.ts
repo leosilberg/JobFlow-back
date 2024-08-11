@@ -1,5 +1,11 @@
 import { Router } from "express";
-import {createJob,deleteJob,editJob,getJob,getJobs,} from "../controllers/job.controller.ts";
+import {
+  createJob,
+  deleteJob,
+  editJob,
+  getJob,
+  getJobs,
+} from "../controllers/job.controller.ts";
 
 const router = Router();
 
