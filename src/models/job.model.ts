@@ -32,7 +32,7 @@ const jobSchema = new Schema<IJob>({
     required: true,
   },
   status: {
-    type: Schema.Types.String,
+    type: Schema.Types.Number,
     required: true,
   },
   order: {
@@ -56,7 +56,6 @@ const jobSchema = new Schema<IJob>({
 jobSchema.pre("save", async function (next) {
   const jobCount = await Job.countDocuments({
     userId: this.userId,
-    status: this.status,
   });
   this.order = jobCount;
 });
