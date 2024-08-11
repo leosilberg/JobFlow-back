@@ -5,7 +5,9 @@ import { AuthRequest } from "../types/authTypes.ts";
 export async function getJobs(req: Request, res: Response) {
   const userId = (req as AuthRequest).userId;
   try {
-    const jobs = await Job.find({ userId: userId });
+    const jobs = await Job.find({ userId: userId }).sort({
+      order: 1,
+    });
     res.status(200).json(jobs);
   } catch (error) {
     console.log(`job.controller: `, (error as Error).message);
@@ -67,6 +69,45 @@ export async function editJob(req: Request, res: Response) {
     res.status(200).json(updatedJob);
   } catch (error) {
     console.log(`job.controller: `, (error as Error).message);
+    if ((error as Error).name === "ValidationError") {
+      res.status(400).json((error as Error).message);
+    } else {
+      res.status(500).json({ message: "Server error while updating job" });
+    }
+  }
+}
+export async function updateJobOrders(req: Request, res: Response) {
+  console.log(`job.controller: joborder`);
+  console.log(`job.controller: `, req.body.jobs);
+  try {
+    const bulkOps = req.body.jobs.map((obj: any) => {
+      console.log(`job.controller: `);
+      const ops = {
+        updateOne: {
+          filter: {
+            _id: obj._id,
+          },
+          // If you were using the MongoDB driver directly, you'd need to do
+          // `update: { $set: { field: ... } }` but mongoose adds $set for you
+          update: {
+            order: obj.changes.order,
+            status: obj.changes.status,
+          },
+        },
+      };
+      // console.log(`job.controller: `, ops);
+      return ops;
+    });
+    // console.log(`job.controller: `, bulkOps);
+    const updatedJobs = await Job.bulkWrite(bulkOps);
+    if (!updatedJobs) {
+      console.log(`job.controller: Not found `);
+      return res.status(401).json("No job found");
+    }
+
+    res.status(200).json(updatedJobs);
+  } catch (error) {
+    console.log(`job.controller: error `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
       res.status(400).json((error as Error).message);
     } else {

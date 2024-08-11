@@ -13,6 +13,7 @@ router.get("/", getJobs);
 router.get("/:jobId", getJob);
 router.post("/", createJob);
 router.patch("/:jobId", editJob);
+router.patch("/order", editJob);
 router.delete("/:jobId", deleteJob);
 
 export default router;

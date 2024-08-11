@@ -8,7 +8,7 @@ export interface IJob extends Document {
   description: string;
   salary?: string;
   link: string;
-  status: string;
+  status: number;
   order: number;
   custom_resume_link?: string;
   interview_date?: string;
