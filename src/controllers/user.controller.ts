@@ -24,16 +24,16 @@ export async function getUser(req: Request, res: Response) {
 }
 
 interface UserChanges {
-  password: string;
-  newPassword?: string;
-  newUsername?: string;
+  resume_link: string;
 }
 export async function editUser(
   req: Request<unknown, unknown, UserChanges, unknown>,
   res: Response
 ) {
+  console.log(req.body);
+
   const userId = (req as AuthRequest).userId;
-  const { password, ...changes } = req.body;
+  const { resume_link } = req.body;
   try {
     const user = await User.findById(userId);
 
@@ -42,14 +42,7 @@ export async function editUser(
       return res.status(401).json("User not found");
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatch) {
-      console.log(`auth.controller: password incorrect`);
-      return res.status(401).json("Email or password are incorrect");
-    }
-
-    user.password = changes.newPassword || user.password;
+    user.resume_link = resume_link;
 
     user.save();
     res.status(200).json("User details changed");
