@@ -77,35 +77,28 @@ export async function editJob(req: Request, res: Response) {
   }
 }
 export async function updateJobOrders(req: Request, res: Response) {
-  console.log(`job.controller: joborder`);
-  console.log(`job.controller: `, req.body.jobs);
   try {
-    const bulkOps = req.body.jobs.map((obj: any) => {
-      console.log(`job.controller: `);
+    const bulkOps = req.body.jobs.map((obj) => {
       const ops = {
         updateOne: {
           filter: {
             _id: obj._id,
           },
-          // If you were using the MongoDB driver directly, you'd need to do
-          // `update: { $set: { field: ... } }` but mongoose adds $set for you
           update: {
             order: obj.changes.order,
             status: obj.changes.status,
           },
         },
       };
-      // console.log(`job.controller: `, ops);
       return ops;
     });
-    // console.log(`job.controller: `, bulkOps);
     const updatedJobs = await Job.bulkWrite(bulkOps);
     if (!updatedJobs) {
       console.log(`job.controller: Not found `);
       return res.status(401).json("No job found");
     }
 
-    res.status(200).json(updatedJobs);
+    res.status(200).json("Updated");
   } catch (error) {
     console.log(`job.controller: error `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
