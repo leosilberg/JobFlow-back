@@ -1,5 +1,6 @@
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import { connectDB } from "./config/db.ts";
 import { verifyToken } from "./middleware/auth.middleware.ts";
@@ -9,7 +10,6 @@ import linkedinRoutes from "./routes/linkedin.routes.ts";
 import aiRoutes from "./routes/openai.routes.ts";
 import userRoutes from "./routes/user.routes.ts";
 
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
