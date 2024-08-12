@@ -78,7 +78,7 @@ export async function editJob(req: Request, res: Response) {
 }
 export async function updateJobOrders(req: Request, res: Response) {
   try {
-    const bulkOps = req.body.jobs.map((obj) => {
+    const bulkOps = req.body.jobs.map((obj: any) => {
       const ops = {
         updateOne: {
           filter: {
