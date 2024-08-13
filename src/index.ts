@@ -28,7 +28,9 @@ async function main() {
   app.use("/api/openai", verifyToken, aiRoutes);
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(
+      path.join(path.resolve(__dirname, ".."), "public", "index.html")
+    );
   });
   app.listen(PORT, () => {
     console.log(`index: Server listening on`, PORT);
