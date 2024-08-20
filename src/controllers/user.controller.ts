@@ -1,7 +1,6 @@
-import bcrypt from "bcrypt";
 import type { Request, Response } from "express";
-import User from "../models/user.model.ts";
-import type { AuthRequest } from "../types/authTypes.ts";
+import User from "../models/user.model";
+import type { AuthRequest } from "../types/authTypes";
 
 export async function getUser(req: Request, res: Response) {
   const userId = (req as AuthRequest).userId;

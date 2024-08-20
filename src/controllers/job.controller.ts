@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import Job from "../models/job.model.ts";
-import { AuthRequest } from "../types/authTypes.ts";
+import Job from "../models/job.model";
+import { AuthRequest } from "../types/authTypes";
 
 export async function getJobs(req: Request, res: Response) {
   const userId = (req as AuthRequest).userId;

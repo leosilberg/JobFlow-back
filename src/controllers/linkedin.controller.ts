@@ -1,10 +1,8 @@
-import { Request, Response } from "express";
 import axios from "axios";
 import { load } from "cheerio";
+import { Request, Response } from "express";
 
 function parseJobList(jobData: string) {
-  console.log(typeof jobData);
-
   const $ = load(jobData);
   const jobs = $("li");
 
@@ -253,7 +251,6 @@ async function getJobs(req: Request, res: Response): Promise<void> {
       if (typeof html !== "string") {
         throw new Error("Expected HTML data but received something else.");
       }
-      console.log(html);
 
       // Load HTML into cheerio
       const jobs = parseJobList(html);
