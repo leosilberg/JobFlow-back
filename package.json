@@ -1,6 +1,5 @@
 {
   "name": "back",
-  "type": "module",
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
