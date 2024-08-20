@@ -1,5 +1,6 @@
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import path from "path";
 import { connectDB } from "./config/db";
@@ -9,7 +10,6 @@ import jobRoutes from "./routes/job.routes";
 import linkedinRoutes from "./routes/linkedin.routes";
 import aiRoutes from "./routes/openai.routes";
 import userRoutes from "./routes/user.routes";
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
