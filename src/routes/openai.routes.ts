@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   generateJobMatcher,
   generateJobRecomendations,
-} from "../controllers/openai.controller.ts";
+} from "../controllers/openai.controller";
 
 const router = Router();
 

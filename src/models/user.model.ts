@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { model, Schema } from "mongoose";
-import type { IUser } from "../types/userTypes.ts";
+import type { IUser } from "../types/userTypes";
 
 Schema.ObjectId.get((v) => v.toString());
 

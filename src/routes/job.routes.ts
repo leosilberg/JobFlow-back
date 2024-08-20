@@ -6,7 +6,7 @@ import {
   getJob,
   getJobs,
   updateJobOrders,
-} from "../controllers/job.controller.ts";
+} from "../controllers/job.controller";
 
 const router = Router();
 
