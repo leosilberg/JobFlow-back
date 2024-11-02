@@ -1,14 +1,24 @@
 import type { Request, Response } from "express";
 import Job from "../models/job.model";
 import { AuthRequest } from "../types/authTypes";
+import { IJob } from "../types/jobTypes";
 
 export async function getJobs(req: Request, res: Response) {
   const userId = (req as AuthRequest).userId;
   try {
     const jobs = await Job.find({ userId: userId }).sort({
+      status: 1,
       order: 1,
     });
-    res.status(200).json(jobs);
+    const sortedJobs = jobs.reduce<IJob[][]>((acc, job) => {
+      if (!acc[job.status]) {
+        acc[job.status] = [];
+      }
+      acc[job.status].push(job);
+      return acc;
+    }, []);
+
+    res.status(200).json(sortedJobs);
   } catch (error) {
     console.log(`job.controller: `, (error as Error).message);
     res.status(500).json("Server error getting all jobs");
