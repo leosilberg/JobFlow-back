@@ -2,8 +2,9 @@ import type { Document, Types } from "mongoose";
 
 export interface IJob extends Document {
   userId: Types.ObjectId;
-  title: string;
+  position: string;
   company: string;
+  company_logo?: string;
   location: string;
   description: string;
   salary?: string;
