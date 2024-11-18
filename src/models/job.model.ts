@@ -7,13 +7,17 @@ const jobSchema = new Schema<IJob>({
     ref: "User",
     required: true,
   },
-  title: {
+  position: {
     type: Schema.Types.String,
     required: true,
   },
   company: {
     type: Schema.Types.String,
     required: true,
+  },
+  company_logo: {
+    type: Schema.Types.String,
+    required: false,
   },
   location: {
     type: Schema.Types.String,
@@ -56,6 +60,7 @@ const jobSchema = new Schema<IJob>({
 jobSchema.pre("save", async function (next) {
   const jobCount = await Job.countDocuments({
     userId: this.userId,
+    status: this.status,
   });
   this.order = jobCount;
 });

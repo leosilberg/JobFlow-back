@@ -1,8 +1,12 @@
 import { Router } from "express";
-import getJobs from "../controllers/linkedin.controller";
+import {
+  getLinkedInJobDetails,
+  getLinkedInJobsList,
+} from "../controllers/linkedin.controller";
 
 const router = Router();
 
-router.get("/", getJobs);
+router.get("/list", getLinkedInJobsList);
+router.get("/job/:jobId", getLinkedInJobDetails);
 
 export default router;

@@ -32,8 +32,6 @@ export async function generateJobRecomendations(req: Request, res: Response) {
       Buffer.from(data)
     );
 
-    console.log(`openai.controller: `, file);
-
     const pyRead = path.join(
       path.resolve(__dirname, ".."),
       "python",
@@ -106,10 +104,11 @@ export async function generateJobMatcher(req: Request, res: Response) {
         ),
       }),
       system:
-        "You are an AI assistant specialized in resume analysis and job matching. Your primary function is to read and understand the content of resumes, identify key skills, experiences, and qualifications, and recommend suitable job roles or career paths based on this information. You will improve the current text you recieve to match the job description and return which original text needs to be replaced with new",
-      prompt: `Generatefor the following resume ${text} using the following job description ${description}`,
+        "You are an AI assistant specialized in resume analysis and job matching. Your primary function is to read and understand the content of job resume, identify key skills, experiences, and qualifications, and recommend suitable job roles or career paths based on this information. You will improve the current text you recieve to match the job description and return which original text needs to be replaced with new.Try to improve each sentance in accordance with the description provided. Provide each complete sentence to be replaced and not more than one sentence each time",
+      prompt: `Generate for the following resume ${text} using the following job description ${description}`,
     });
 
+    console.log(`openai.controller: `, result.object.changes);
     const pyReplace = path.join(
       path.resolve(__dirname, ".."),
       "python",
