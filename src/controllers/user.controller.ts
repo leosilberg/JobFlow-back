@@ -29,8 +29,6 @@ export async function editUser(
   req: Request<unknown, unknown, UserChanges, unknown>,
   res: Response
 ) {
-  console.log(req.body);
-
   const userId = (req as AuthRequest).userId;
   const { resume_link } = req.body;
   try {

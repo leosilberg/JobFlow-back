@@ -112,9 +112,10 @@ def parse_job_details(job):
         ".description__job-criteria-item:nth-child(2) .description__job-criteria-text--criteria",
     ).get_text(strip=True)
 
-    description = get_element_or_none(job, ".relative.overflow-hidden").get_text(
-        separator="\n", strip=True
-    )
+    description = get_element_or_none(job, ".relative.overflow-hidden")
+    # .get_text(
+    #     separator="\n\n", strip=True
+    # )
 
     return {
         "position": position,
@@ -125,7 +126,7 @@ def parse_job_details(job):
         "applicants": applicants,
         "level": level,
         "type": type,
-        "description": description,
+        "description": str(description),
     }
 
 
@@ -219,7 +220,7 @@ browsers = [  # Edge
 options = Options(
     version_ranges={
         "chrome": VersionRange(min_version=99),
-        "safari": VersionRange(min_version=Version(major=15, minor=3)),
+        "safari": VersionRange(min_version=16),
         "edge": VersionRange(min_version=99),
     }
 )
@@ -260,14 +261,18 @@ async def async_request(client: AsyncSession, url, indx=0):
                     if type in browser
                     and float(browser.replace(type, "").replace("_", "."))
                     <= float(version)
-                ][-1]
-            except:
-                print("error")
+                ]
+                if len(filtered_browser) > 0:
+                    filtered_browser = filtered_browser[-1]
+                else:
+                    continue
+            except Exception as e:
+                print(e)
                 print(type)
                 print(platform)
                 print(version)
-                print(filtered_browser)
                 print(json.dumps(headers, indent=4))
+                continue
 
         try:
             response = await client.get(
@@ -288,7 +293,7 @@ async def async_request(client: AsyncSession, url, indx=0):
                 # print(f"{indx} Failed")
                 retry = retry + 1
         except Exception as e:
-            print(f"{indx}: Connection error {e}")
+            # print(f"{indx}: Connection error {e}")
             retry = retry + 1
     return "Max retry reached"
 

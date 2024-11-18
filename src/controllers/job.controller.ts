@@ -60,7 +60,6 @@ export async function createJob(req: Request, res: Response) {
 
 export async function editJob(req: Request, res: Response) {
   const { jobId } = req.params;
-  console.log(`job.controller: `, req.body);
   try {
     const updatedJob = await Job.findOneAndUpdate(
       { _id: jobId },
