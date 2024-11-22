@@ -1,64 +1,83 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
+import { z } from "zod";
 import Job from "../models/job.model";
-import { AuthRequest } from "../types/authTypes";
+import { JobSchema } from "../schemas/job.schema";
+import { TypedRequest } from "../types/express.types";
 import { IJob } from "../types/jobTypes";
+import { errorResponse, successResponse } from "../utils/response.utils";
 
-export async function getJobs(req: Request, res: Response) {
-  const userId = (req as AuthRequest).userId;
-  try {
-    const jobs = await Job.find({ userId: userId }).sort({
-      status: 1,
-      order: 1,
-    });
-    const sortedJobs = jobs.reduce<IJob[][]>((acc, job) => {
-      if (!acc[job.status]) {
-        acc[job.status] = [];
-      }
-      acc[job.status].push(job);
-      return acc;
-    }, []);
+export const GetJobsSchema = {};
+export async function getJobs(
+  req: TypedRequest<typeof GetJobSchema>,
+  res: Response
+) {
+  const userId = req.userId;
 
-    res.status(200).json(sortedJobs);
-  } catch (error) {
-    console.log(`job.controller: `, (error as Error).message);
-    res.status(500).json("Server error getting all jobs");
-  }
-}
+  const jobs = await Job.find({ userId: userId }).sort({
+    status: 1,
+    order: 1,
+  });
 
-export async function getJob(req: Request, res: Response) {
-  const { jobId } = req.params;
-  try {
-    const job = await Job.findById(jobId);
-    if (!job) {
-      console.log(`job.controller: Not found `, jobId);
-      return res.status(401).json("No job found");
+  const sortedJobs = jobs.reduce<IJob[][]>((acc, job) => {
+    if (!acc[job.status]) {
+      acc[job.status] = [];
     }
+    acc[job.status].push(job);
+    return acc;
+  }, []);
 
-    res.status(200).json(job);
-  } catch (error) {
-    console.log(`job.controller: `, (error as Error).message);
-    res.status(500).json("Server error getting job");
-  }
+  return successResponse(res, sortedJobs);
 }
 
-export async function createJob(req: Request, res: Response) {
-  const userId = (req as AuthRequest).userId;
+export const GetJobSchema = {
+  params: z.object({
+    jobId: z.string(),
+  }),
+};
+export async function getJob(
+  req: TypedRequest<typeof GetJobSchema>,
+  res: Response
+) {
+  const { jobId } = req.params;
+
+  const job = await Job.findById(jobId);
+  if (!job) {
+    req.log.warn(`job.controller: Not found `, jobId);
+    return errorResponse(res, 401, "No job found");
+  }
+
+  return successResponse(res, job);
+}
+
+export const CreateJobSchema = {
+  body: JobSchema.omit({ userId: true, order: true }),
+};
+export async function createJob(
+  req: TypedRequest<typeof CreateJobSchema>,
+  res: Response
+) {
+  const userId = req.userId;
   try {
     const newJob = new Job({ ...req.body, userId });
     const savedJob = await newJob.save();
-    res.status(201).json(savedJob);
+    return successResponse(res, savedJob, 201, "Job created");
   } catch (error) {
-    error as Error;
-    console.log(`job.controller: `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
-      res.status(400).json((error as Error).message);
-    } else {
-      res.status(500).json("Server error while creating job");
+      req.log.error(`job.controller: `, error);
+      return errorResponse(res, 400, (error as Error).message);
     }
+    throw error;
   }
 }
 
-export async function editJob(req: Request, res: Response) {
+export const EditJobSchema = {
+  params: z.object({ jobId: z.string() }),
+  body: JobSchema.omit({ userId: true }).partial(),
+};
+export async function editJob(
+  req: TypedRequest<typeof EditJobSchema>,
+  res: Response
+) {
   const { jobId } = req.params;
   try {
     const updatedJob = await Job.findOneAndUpdate(
@@ -71,23 +90,39 @@ export async function editJob(req: Request, res: Response) {
     );
 
     if (!updatedJob) {
-      console.log(`job.controller: Not found `, jobId);
-      return res.status(401).json("No job found");
+      req.log.warn(`job.controller: Not found `, jobId);
+      return errorResponse(res, 401, "No job found");
     }
 
-    res.status(200).json(updatedJob);
+    return successResponse(res, updatedJob);
   } catch (error) {
-    console.log(`job.controller: `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
-      res.status(400).json((error as Error).message);
-    } else {
-      res.status(500).json({ message: "Server error while updating job" });
+      req.log.error(`job.controller: `, error);
+      return errorResponse(res, 400, (error as Error).message);
     }
+    throw error;
   }
 }
-export async function updateJobOrders(req: Request, res: Response) {
+
+export const UpdateJobOrdersSchema = {
+  body: z.object({
+    jobs: z.array(
+      z.object({
+        _id: z.string(),
+        changes: z.object({
+          order: z.number().int().min(0),
+          status: z.number().int().min(0),
+        }),
+      })
+    ),
+  }),
+};
+export async function updateJobOrders(
+  req: TypedRequest<typeof UpdateJobOrdersSchema>,
+  res: Response
+) {
   try {
-    const bulkOps = req.body.jobs.map((obj: any) => {
+    const bulkOps = req.body.jobs.map((obj) => {
       const ops = {
         updateOne: {
           filter: {
@@ -103,35 +138,39 @@ export async function updateJobOrders(req: Request, res: Response) {
     });
     const updatedJobs = await Job.bulkWrite(bulkOps);
     if (!updatedJobs) {
-      console.log(`job.controller: Not found `);
-      return res.status(401).json("No job found");
+      req.log.warn(`job.controller: Bulk jobs Not found `);
+      return errorResponse(res, 401, "No jobs found");
     }
 
-    res.status(200).json("Updated");
+    return successResponse(res, {});
   } catch (error) {
-    console.log(`job.controller: error `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
-      res.status(400).json((error as Error).message);
-    } else {
-      res.status(500).json({ message: "Server error while updating job" });
+      req.log.error(`job.controller: `, error);
+      return errorResponse(res, 400, (error as Error).message);
     }
+    throw error;
   }
 }
 
-export async function deleteJob(req: Request, res: Response) {
+export const DeleteJobSchema = {
+  params: z.object({
+    jobId: z.string(),
+  }),
+};
+export async function deleteJob(
+  req: TypedRequest<typeof DeleteJobSchema>,
+  res: Response
+) {
   const { jobId } = req.params;
-  try {
-    const deletedJob = await Job.findOneAndDelete({
-      _id: jobId,
-    });
 
-    if (!deletedJob) {
-      console.log(`job.controller: Not found `, jobId);
-      res.status(404).json("No job found");
-    }
-    res.status(200).json("Job deleted succesfuly");
-  } catch (error) {
-    console.log(`job.controller: `, (error as Error).message);
-    res.status(500).json("Server error deleting job");
+  const deletedJob = await Job.findOneAndDelete({
+    _id: jobId,
+  });
+
+  if (!deletedJob) {
+    req.log.warn(`job.controller: Not found `, jobId);
+    return errorResponse(res, 401, "No job found");
   }
+
+  return successResponse(res, {}, 200, "Job deleted succesfuly");
 }
