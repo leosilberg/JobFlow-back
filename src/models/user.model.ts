@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { model, Schema } from "mongoose";
-import type { IUser } from "../types/userTypes";
+import { IUser } from "../types/userTypes";
 
 Schema.ObjectId.get((v) => v.toString());
 
@@ -12,8 +12,15 @@ const userSchema = new Schema<IUser>(
     lastName: { type: String, required: true },
     resume_link: { type: String, required: false },
   },
-  { toJSON: { virtuals: false, getters: true } }
+  { toJSON: { virtuals: false, getters: true } },
 );
+
+// const schema = zodSchemaRaw(UserSchema);
+// schema.email.index = true;
+
+// const userSchema = new Schema(schema, {
+//   toJSON: { virtuals: false, getters: true },
+// });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

@@ -1,0 +1,1 @@
+commitlint -V --edit $1

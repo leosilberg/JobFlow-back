@@ -1,10 +1,14 @@
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
+
 import express from "express";
 import path from "path";
-import { connectDB } from "./config/db";
+import pinoHttp from "pino-http";
+import { connectDB } from "./libs/db";
+import { logger } from "./libs/logger";
 import { verifyToken } from "./middleware/auth.middleware";
+import { errorHandler } from "./middleware/error.middleware";
 import authRoutes from "./routes/auth.routes";
 import jobRoutes from "./routes/job.routes";
 import linkedinRoutes from "./routes/linkedin.routes";
@@ -13,11 +17,11 @@ import userRoutes from "./routes/user.routes";
 
 const PORT = process.env.PORT || 3000;
 
-const app = express();
-
 async function main() {
   await connectDB();
+  const app = express();
 
+  app.use(pinoHttp({ logger, autoLogging: false }));
   app.use(express.json());
   app.use(cors());
   app.use(express.static("public"));
@@ -27,13 +31,15 @@ async function main() {
   app.use("/api/linkedin", linkedinRoutes);
   app.use("/api/openai", verifyToken, aiRoutes);
 
-  app.get("*", (req, res) => {
+  app.get("*path", (req, res) => {
     res.sendFile(
-      path.join(path.resolve(__dirname, ".."), "public", "index.html")
+      path.join(path.resolve(__dirname, ".."), "public", "index.html"),
     );
   });
+
+  app.use(errorHandler);
   app.listen(PORT, () => {
-    console.log(`index: Server listening on`, PORT);
+    logger.info(`index: Server listening on ${PORT}`);
   });
 }
 

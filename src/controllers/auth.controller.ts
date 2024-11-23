@@ -1,12 +1,21 @@
 import bcrypt from "bcrypt";
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import jwt, { type Secret } from "jsonwebtoken";
-import mongoose, { Error } from "mongoose";
+import mongoose from "mongoose";
 import User from "../models/user.model";
+import { UserSchema } from "../schemas/user.schema";
+import { TypedRequest } from "../types/express.types";
+import { errorResponse, successResponse } from "../utils/response.utils";
 
 const { JWT_SECRET } = process.env;
 
-export async function register(req: Request, res: Response) {
+export const RegisterSchema = {
+  body: UserSchema,
+};
+export async function register(
+  req: TypedRequest<typeof RegisterSchema>,
+  res: Response,
+) {
   try {
     const { email, password, firstName, lastName } = req.body;
     const newUser = new User({
@@ -16,43 +25,44 @@ export async function register(req: Request, res: Response) {
       lastName,
     });
     await newUser.save();
-    res.status(201).json("User registed succesfully");
+    return successResponse(res, {}, 201, "User registed succesfully");
   } catch (error) {
-    console.log(`auth.controller: `, (error as Error).message);
     if (
       error instanceof mongoose.mongo.MongoServerError &&
       error.code === 11000
     ) {
-      return res.status(400).json("User already exists");
+      req.log.error(`auth.controller: `, error);
+      return errorResponse(res, 400, "User already exists");
     }
-    res.status(500).json("Registration failed");
+    throw error;
   }
 }
 
-export async function login(req: Request, res: Response) {
-  try {
-    const { email, password } = req.body;
+export const LoginSchema = {
+  body: UserSchema.pick({ email: true, password: true }),
+};
+export async function login(
+  req: TypedRequest<typeof LoginSchema>,
+  res: Response,
+) {
+  const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-    if (!user) {
-      console.log(`auth.controller: user not found`);
-      return res.status(401).json("Email or password are incorrect");
-    }
-
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatch) {
-      console.log(`auth.controller: password incorrect`);
-      return res.status(401).json("Email or password are incorrect");
-    }
-
-    const { _id } = user.toJSON();
-
-    const token = jwt.sign({ _id }, JWT_SECRET as Secret, { expiresIn: "1d" });
-    res.status(200).json(token);
-  } catch (error) {
-    console.log(`auth.controller: `, (error as Error).message);
-    res.status(500).json("Login failed");
+  if (!user) {
+    req.log.warn(`auth.controller: user not found`);
+    return errorResponse(res, 401, "Email or password are incorrect");
   }
+
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatch) {
+    req.log.warn(`auth.controller: password incorrect`);
+    return errorResponse(res, 401, "Email or password are incorrect");
+  }
+
+  const { _id } = user.toJSON();
+
+  const token = jwt.sign({ _id }, JWT_SECRET as Secret, { expiresIn: "1d" });
+  return successResponse(res, token);
 }

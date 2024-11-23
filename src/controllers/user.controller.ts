@@ -1,72 +1,72 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
 import User from "../models/user.model";
-import type { AuthRequest } from "../types/authTypes";
+import { UserSchema } from "../schemas/user.schema";
+import { TypedRequest } from "../types/express.types";
+import { errorResponse, successResponse } from "../utils/response.utils";
 
-export async function getUser(req: Request, res: Response) {
-  const userId = (req as AuthRequest).userId;
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      console.log(`user.controller: Not found `, userId);
-      return res.status(401).json("No user found");
-    }
-
-    const { password, ...userWithoutPassword } = user.toJSON();
-
-    res.status(200).json({
-      ...userWithoutPassword,
-    });
-  } catch (error) {
-    console.log(`user.controller: `, (error as Error).message);
-    res.status(500).json("Server error getting user");
-  }
-}
-
-interface UserChanges {
-  resume_link: string;
-}
-export async function editUser(
-  req: Request<unknown, unknown, UserChanges, unknown>,
-  res: Response
+export const GetUserSchema = {};
+export async function getUser(
+  req: TypedRequest<typeof GetUserSchema>,
+  res: Response,
 ) {
-  const userId = (req as AuthRequest).userId;
+  const userId = req.userId;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    req.log.warn(`user.controller: Not found`, userId);
+    return errorResponse(res, 401, "No user found");
+  }
+
+  const { password, ...userWithoutPassword } = user.toJSON();
+
+  return successResponse(res, { ...userWithoutPassword });
+}
+
+export const EditUserSchema = {
+  body: UserSchema.partial(),
+};
+export async function editUser(
+  req: TypedRequest<typeof EditUserSchema>,
+  res: Response,
+) {
+  const userId = req.userId;
   const { resume_link } = req.body;
   try {
     const user = await User.findById(userId);
 
     if (!user) {
-      console.log(`auth.controller: user not found`);
-      return res.status(401).json("User not found");
+      req.log.warn(`user.controller: Not found`, userId);
+      return errorResponse(res, 401, "User not found");
     }
 
     user.resume_link = resume_link;
 
     user.save();
-    res.status(200).json("User details changed");
+    return successResponse(res, {}, 200, "User details changed");
   } catch (error) {
-    console.log(`user.controller: `, (error as Error).message);
     if ((error as Error).name === "ValidationError") {
-      res.status(400).json((error as Error).message);
-    } else {
-      res.status(500).json({ message: "Server error while updating user" });
+      req.log.error(`user.controller: `, error);
+      return errorResponse(res, 400, (error as Error).message);
     }
+    throw error;
   }
 }
 
-export async function deleteUser(req: Request, res: Response) {
-  const userId = (req as AuthRequest).userId;
-  try {
-    const deletedUser = await User.findOneAndDelete({
-      _id: userId,
-    });
+export const DeleteUserSchema = {};
+export async function deleteUser(
+  req: TypedRequest<typeof DeleteUserSchema>,
+  res: Response,
+) {
+  const userId = req.userId;
 
-    if (!deletedUser) {
-      console.log(`user.controller: `, userId);
-      res.status(404).json("No user found");
-    }
-    res.status(200).json("User deleted succesfuly");
-  } catch (error) {
-    console.log(`user.controller: `, (error as Error).message);
-    res.status(500).json("Server error deleting user");
+  const deletedUser = await User.findOneAndDelete({
+    _id: userId,
+  });
+
+  if (!deletedUser) {
+    req.log.warn(`user.controller: not found`, userId);
+    return errorResponse(res, 404, "No user found");
   }
+
+  return successResponse(res, {}, 200, "User deleted succesfuly");
 }
