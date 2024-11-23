@@ -16,12 +16,12 @@ router.get(
     handler: validateErrorHandler,
     ...GenerateJobRecomendationsSchema,
   }),
-  generateJobRecomendations
+  generateJobRecomendations,
 );
 router.post(
   "/job-matcher",
   validate({ handler: validateErrorHandler, ...GenerateJobMatcherSchema }),
-  generateJobMatcher
+  generateJobMatcher,
 );
 
 export default router;

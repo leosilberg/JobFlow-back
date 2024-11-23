@@ -13,11 +13,11 @@ const router = Router();
 router.post(
   "/login",
   validate({ handler: validateErrorHandler, ...LoginSchema }),
-  login
+  login,
 );
 router.post(
   "/register",
   validate({ handler: validateErrorHandler, ...RegisterSchema }),
-  register
+  register,
 );
 export default router;

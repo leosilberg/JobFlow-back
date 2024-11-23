@@ -6,7 +6,7 @@ export async function saveToTempFile(fileName: string, buffer: Buffer) {
     const tempFilePath = path.join(
       path.resolve(__dirname, ".."),
       "temp",
-      fileName
+      fileName,
     );
     await fs.writeFile(tempFilePath, buffer);
     return tempFilePath;

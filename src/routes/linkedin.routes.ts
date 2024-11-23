@@ -13,12 +13,12 @@ const router = Router();
 router.get(
   "/list",
   validate({ handler: validateErrorHandler, ...GetLinkedInJobsList }),
-  getLinkedInJobsList
+  getLinkedInJobsList,
 );
 router.get(
   "/job/:jobId",
   validate({ handler: validateErrorHandler, ...GetLinkedInJobDetails }),
-  getLinkedInJobDetails
+  getLinkedInJobDetails,
 );
 
 export default router;

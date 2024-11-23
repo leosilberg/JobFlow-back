@@ -15,7 +15,7 @@ import { errorResponse, successResponse } from "../utils/response.utils";
 export const GenerateJobRecomendationsSchema = {};
 export async function generateJobRecomendations(
   req: TypedRequest<typeof GenerateJobRecomendationsSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
 
@@ -36,13 +36,13 @@ export async function generateJobRecomendations(
 
   const file = await saveToTempFile(
     `file_${Date.now()}.docx`,
-    Buffer.from(data)
+    Buffer.from(data),
   );
 
   const pyRead = path.join(
     path.resolve(__dirname, ".."),
     "python",
-    "docx_read.py"
+    "docx_read.py",
   );
 
   const text = await runPythonScript(pyRead, [file]);
@@ -55,7 +55,7 @@ export async function generateJobRecomendations(
         z.object({
           title: z.string(),
           description: z.string(),
-        })
+        }),
       ),
     }),
     system:
@@ -72,7 +72,7 @@ export const GenerateJobMatcherSchema = {
 };
 export async function generateJobMatcher(
   req: TypedRequest<typeof GenerateJobMatcherSchema>,
-  res: Response
+  res: Response,
 ) {
   const { description } = req.body;
   const userId = req.userId;
@@ -94,13 +94,13 @@ export async function generateJobMatcher(
 
   const file = await saveToTempFile(
     `file_${Date.now()}.docx`,
-    Buffer.from(data)
+    Buffer.from(data),
   );
 
   const pyRead = path.join(
     path.resolve(__dirname, ".."),
     "python",
-    "docx_read.py"
+    "docx_read.py",
   );
 
   const text = await runPythonScript(pyRead, [file]);
@@ -112,7 +112,7 @@ export async function generateJobMatcher(
         z.object({
           originalText: z.string(),
           newText: z.string(),
-        })
+        }),
       ),
     }),
     system:
@@ -124,7 +124,7 @@ export async function generateJobMatcher(
   const pyReplace = path.join(
     path.resolve(__dirname, ".."),
     "python",
-    "docx_replace.py"
+    "docx_replace.py",
   );
   const args = [file, JSON.stringify(result.object.changes)];
 

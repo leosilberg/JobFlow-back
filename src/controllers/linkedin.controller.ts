@@ -10,7 +10,7 @@ export const GetLinkedInJobsList = {
 };
 export async function getLinkedInJobsList(
   req: TypedRequest<typeof GetLinkedInJobsList>,
-  res: Response
+  res: Response,
 ): Promise<void> {
   const commandLineArgs = [];
   for (const [key, value] of Object.entries(req.query)) {
@@ -21,7 +21,7 @@ export async function getLinkedInJobsList(
   const pyScraper = path.join(
     path.resolve(__dirname, ".."),
     "python",
-    "linkedin_scraper.py"
+    "linkedin_scraper.py",
   );
 
   const data = await runPythonScript(pyScraper, ["list", ...commandLineArgs]);
@@ -34,14 +34,14 @@ export const GetLinkedInJobDetails = {
 };
 export async function getLinkedInJobDetails(
   req: TypedRequest<typeof GetLinkedInJobDetails>,
-  res: Response
+  res: Response,
 ): Promise<void> {
   const { jobId } = req.params;
 
   const pyScraper = path.join(
     path.resolve(__dirname, ".."),
     "python",
-    "linkedin_scraper.py"
+    "linkedin_scraper.py",
   );
 
   const data = await runPythonScript(pyScraper, ["details", jobId]);

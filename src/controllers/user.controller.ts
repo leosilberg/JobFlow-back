@@ -7,7 +7,7 @@ import { errorResponse, successResponse } from "../utils/response.utils";
 export const GetUserSchema = {};
 export async function getUser(
   req: TypedRequest<typeof GetUserSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
 
@@ -27,7 +27,7 @@ export const EditUserSchema = {
 };
 export async function editUser(
   req: TypedRequest<typeof EditUserSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
   const { resume_link } = req.body;
@@ -55,7 +55,7 @@ export async function editUser(
 export const DeleteUserSchema = {};
 export async function deleteUser(
   req: TypedRequest<typeof DeleteUserSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
 

@@ -12,7 +12,7 @@ const userSchema = new Schema<IUser>(
     lastName: { type: String, required: true },
     resume_link: { type: String, required: false },
   },
-  { toJSON: { virtuals: false, getters: true } }
+  { toJSON: { virtuals: false, getters: true } },
 );
 
 // const schema = zodSchemaRaw(UserSchema);

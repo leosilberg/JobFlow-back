@@ -14,7 +14,7 @@ export const RegisterSchema = {
 };
 export async function register(
   req: TypedRequest<typeof RegisterSchema>,
-  res: Response
+  res: Response,
 ) {
   try {
     const { email, password, firstName, lastName } = req.body;
@@ -43,7 +43,7 @@ export const LoginSchema = {
 };
 export async function login(
   req: TypedRequest<typeof LoginSchema>,
-  res: Response
+  res: Response,
 ) {
   const { email, password } = req.body;
 

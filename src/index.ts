@@ -33,7 +33,7 @@ async function main() {
 
   app.get("*path", (req, res) => {
     res.sendFile(
-      path.join(path.resolve(__dirname, ".."), "public", "index.html")
+      path.join(path.resolve(__dirname, ".."), "public", "index.html"),
     );
   });
 

@@ -9,7 +9,7 @@ import { errorResponse, successResponse } from "../utils/response.utils";
 export const GetJobsSchema = {};
 export async function getJobs(
   req: TypedRequest<typeof GetJobSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
 
@@ -36,7 +36,7 @@ export const GetJobSchema = {
 };
 export async function getJob(
   req: TypedRequest<typeof GetJobSchema>,
-  res: Response
+  res: Response,
 ) {
   const { jobId } = req.params;
 
@@ -54,7 +54,7 @@ export const CreateJobSchema = {
 };
 export async function createJob(
   req: TypedRequest<typeof CreateJobSchema>,
-  res: Response
+  res: Response,
 ) {
   const userId = req.userId;
   try {
@@ -76,7 +76,7 @@ export const EditJobSchema = {
 };
 export async function editJob(
   req: TypedRequest<typeof EditJobSchema>,
-  res: Response
+  res: Response,
 ) {
   const { jobId } = req.params;
   try {
@@ -86,7 +86,7 @@ export async function editJob(
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!updatedJob) {
@@ -113,13 +113,13 @@ export const UpdateJobOrdersSchema = {
           order: z.number().int().min(0),
           status: z.number().int().min(0),
         }),
-      })
+      }),
     ),
   }),
 };
 export async function updateJobOrders(
   req: TypedRequest<typeof UpdateJobOrdersSchema>,
-  res: Response
+  res: Response,
 ) {
   try {
     const bulkOps = req.body.jobs.map((obj) => {
@@ -159,7 +159,7 @@ export const DeleteJobSchema = {
 };
 export async function deleteJob(
   req: TypedRequest<typeof DeleteJobSchema>,
-  res: Response
+  res: Response,
 ) {
   const { jobId } = req.params;
 

@@ -21,32 +21,32 @@ const router = Router();
 router.get(
   "/",
   validate({ handler: validateErrorHandler, ...GetJobsSchema }),
-  getJobs
+  getJobs,
 );
 router.get(
   "/:jobId",
   validate({ handler: validateErrorHandler, ...GetJobSchema }),
-  getJob
+  getJob,
 );
 router.post(
   "/",
   validate({ handler: validateErrorHandler, ...CreateJobSchema }),
-  createJob
+  createJob,
 );
 router.patch(
   "/order",
   validate({ handler: validateErrorHandler, ...UpdateJobOrdersSchema }),
-  updateJobOrders
+  updateJobOrders,
 );
 router.patch(
   "/:jobId",
   validate({ handler: validateErrorHandler, ...EditJobSchema }),
-  editJob
+  editJob,
 );
 router.delete(
   "/:jobId",
   validate({ handler: validateErrorHandler, ...DeleteJobSchema }),
-  deleteJob
+  deleteJob,
 );
 
 export default router;

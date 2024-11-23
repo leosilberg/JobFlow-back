@@ -6,7 +6,7 @@ export function errorHandler(
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   req.log.error(err);
   return errorResponse(res, 500, "Server error");
@@ -19,7 +19,7 @@ export function validateErrorHandler(
   }[],
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   req.log.error(errors);
   return errorResponse(res, 400, "Invalid request", errors);

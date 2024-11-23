@@ -15,17 +15,17 @@ const router = Router();
 router.get(
   "/",
   validate({ handler: validateErrorHandler, ...GetUserSchema }),
-  getUser
+  getUser,
 );
 router.patch(
   "/",
   validate({ handler: validateErrorHandler, ...EditUserSchema }),
-  editUser
+  editUser,
 );
 router.delete(
   "/",
   validate({ handler: validateErrorHandler, ...DeleteUserSchema }),
-  deleteUser
+  deleteUser,
 );
 
 export default router;
