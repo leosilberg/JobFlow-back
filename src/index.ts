@@ -15,7 +15,7 @@ import linkedinRoutes from "./routes/linkedin.routes";
 import aiRoutes from "./routes/openai.routes";
 import userRoutes from "./routes/user.routes";
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || "3000";
 
 async function main() {
   await connectDB();
@@ -38,7 +38,7 @@ async function main() {
   });
 
   app.use(errorHandler);
-  app.listen(PORT, () => {
+  app.listen(parseInt(PORT), "0.0.0.0", () => {
     logger.info(`index: Server listening on ${PORT}`);
   });
 }

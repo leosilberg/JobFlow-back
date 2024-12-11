@@ -2,10 +2,10 @@
   "name": "back",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc && copyup src/python/* dist/python && mkdir -p dist/temp",
+    "build": "tsc && copyfiles src/python/* dist/python -f && mkdir -p dist/temp",
     "dev": "ts-node-dev src/index.ts",
     "postinstall": "patch-package",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "lint": "eslint src",
     "format": "prettier --write .",
     "check-format": "prettier --check ."
@@ -28,7 +28,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.2",
     "pino-http": "^10.3.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "patch-package": "^8.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
@@ -43,7 +44,6 @@
     "husky": "^9.1.7",
     "inquirer": "9",
     "lint-staged": "^15.2.10",
-    "patch-package": "^8.0.0",
     "prettier": "3.3.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "ts-node-dev": "^2.0.0",
