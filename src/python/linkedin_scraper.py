@@ -11,8 +11,10 @@ import asyncio
 from ua_generator.options import Options
 from ua_generator.data.version import VersionRange, Version
 from user_agents import parse
+import sys
 
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def parse_job_list(jobs):
