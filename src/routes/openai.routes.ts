@@ -11,7 +11,7 @@ import { validateErrorHandler } from "../middleware/error.middleware";
 const router = Router();
 
 router.get(
-  "/job-recomendation",
+  "/recommend",
   validate({
     handler: validateErrorHandler,
     ...GenerateJobRecomendationsSchema,
@@ -19,7 +19,7 @@ router.get(
   generateJobRecomendations,
 );
 router.post(
-  "/job-matcher",
+  "/matcher",
   validate({ handler: validateErrorHandler, ...GenerateJobMatcherSchema }),
   generateJobMatcher,
 );

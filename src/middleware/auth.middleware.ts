@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Secret } from "jsonwebtoken";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import type { UserJwtPaylod } from "../types/authTypes";
 import { errorResponse } from "../utils/response.utils";
 const { JWT_SECRET } = process.env;
@@ -18,7 +18,10 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
     req.userId = decoded._id;
     next();
   } catch (error) {
-    req.log.error(`auth.middleware: `, error);
+    req.log.error(error);
+    if (error instanceof TokenExpiredError) {
+      return errorResponse(res, 401, "Token expired");
+    }
     return errorResponse(res, 401, "Invalid token");
   }
 }

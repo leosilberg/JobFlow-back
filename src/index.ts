@@ -28,12 +28,12 @@ async function main() {
   app.use("/api/auth", authRoutes);
   app.use("/api/user", verifyToken, userRoutes);
   app.use("/api/job", verifyToken, jobRoutes);
-  app.use("/api/linkedin", linkedinRoutes);
+  app.use("/api/linkedin", verifyToken, linkedinRoutes);
   app.use("/api/openai", verifyToken, aiRoutes);
 
   app.get("*path", (req, res) => {
     res.sendFile(
-      path.join(path.resolve(__dirname, ".."), "public", "index.html"),
+      path.join(path.resolve(__dirname, "."), "public", "index.html"),
     );
   });
 
