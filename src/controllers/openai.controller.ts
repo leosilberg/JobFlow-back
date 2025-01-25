@@ -97,8 +97,6 @@ export async function generateJobMatcher(
     `http://quart:5000/api/file/docx/read/${path.basename(file)}`,
   );
 
-  fs.unlink(file);
-
   if (readResponse.status !== 200) {
     return errorResponse(res, 400, "Error reading resume");
   }
@@ -135,11 +133,14 @@ export async function generateJobMatcher(
       }),
     },
   );
+
   if (response.status !== 200) {
     fs.unlink(file);
     fs.unlink(file.replace(".docx", "_updated.docx"));
     return errorResponse(res, 400, "Error editing resume");
   }
+
+  const replaceData = await response.json();
 
   return res
     .status(200)
