@@ -13,6 +13,29 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "3000:${PORT}"
+    networks:
+      backend:
+       aliases:
+          - app
+    volumes:
+      - shared-data:/usr/src/app/temp
+    restart: on-failure
+  quart:
+    image: ghcr.io/leosilberg/jobflow-quart-app:1.0
+    ports:
+      - "5000:5000"
+    networks:
+      backend:
+       aliases:
+          - quart
+    volumes:
+      - shared-data:/app/temp
+    restart: on-failure
 
+volumes:
+  shared-data: 
 
+networks:
+  backend:
+    driver: bridge
 

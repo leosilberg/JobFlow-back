@@ -9,7 +9,6 @@ import { logger } from "../libs/logger";
 import User from "../models/user.model";
 import { TypedRequest } from "../types/express.types";
 import { saveToTempFile } from "../utils/file.utils";
-import { runPythonScript } from "../utils/python.utils";
 import { errorResponse, successResponse } from "../utils/response.utils";
 
 export const GenerateJobRecomendationsSchema = {};
@@ -34,19 +33,19 @@ export async function generateJobRecomendations(
     responseType: "arraybuffer",
   });
 
-  const file = await saveToTempFile(
-    `file_${Date.now()}.docx`,
-    Buffer.from(data),
+  const file = await saveToTempFile(`${Date.now()}.docx`, Buffer.from(data));
+
+  const response = await fetch(
+    `http://quart:5000/api/file/docx/read/${path.basename(file)}`,
   );
 
-  const pyRead = path.join(
-    path.resolve(__dirname, ".."),
-    "python",
-    "docx_read.py",
-  );
-
-  const text = await runPythonScript(pyRead, [file]);
   fs.unlink(file);
+
+  if (response.status !== 200) {
+    return errorResponse(res, 400, "Error reading resume");
+  }
+
+  const rawText = await response.json();
 
   const result = await generateObject({
     model: openai("gpt-4o-mini"),
@@ -60,7 +59,7 @@ export async function generateJobRecomendations(
     }),
     system:
       "You are an AI assistant specialized in resume analysis and job matching. Your primary function is to read and understand the content of resumes, identify key skills, experiences, and qualifications, and recommend suitable job roles or career paths based on this information.",
-    prompt: `Generate 5 jobs for the following resume ${text}`,
+    prompt: `Generate 5 jobs for the following resume ${rawText}`,
   });
   return successResponse(res, result.object.jobs);
 }
@@ -92,18 +91,19 @@ export async function generateJobMatcher(
     responseType: "arraybuffer", // Important to set response type to arraybuffer
   });
 
-  const file = await saveToTempFile(
-    `file_${Date.now()}.docx`,
-    Buffer.from(data),
+  const file = await saveToTempFile(`${Date.now()}.docx`, Buffer.from(data));
+
+  const readResponse = await fetch(
+    `http://quart:5000/api/file/docx/read/${path.basename(file)}`,
   );
 
-  const pyRead = path.join(
-    path.resolve(__dirname, ".."),
-    "python",
-    "docx_read.py",
-  );
+  fs.unlink(file);
 
-  const text = await runPythonScript(pyRead, [file]);
+  if (readResponse.status !== 200) {
+    return errorResponse(res, 400, "Error reading resume");
+  }
+
+  const rawText = await readResponse.json();
 
   const result = await generateObject({
     model: openai("gpt-4o-mini"),
@@ -117,22 +117,34 @@ export async function generateJobMatcher(
     }),
     system:
       "You are an AI assistant specialized in resume analysis and job matching. Your primary function is to read and understand the content of job resume, identify key skills, experiences, and qualifications, and recommend suitable job roles or career paths based on this information. You will improve the current text you recieve to match the job description and return which original text needs to be replaced with new.Try to improve each sentance in accordance with the description provided. Provide each complete sentence to be replaced and not more than one sentence each time",
-    prompt: `Generate for the following resume ${text} using the following job description ${description}`,
+    prompt: `Generate for the following resume ${rawText} using the following job description ${description}`,
   });
 
-  logger.debug(`openai.controller: `, result.object.changes);
-  const pyReplace = path.join(
-    path.resolve(__dirname, ".."),
-    "python",
-    "docx_replace.py",
-  );
-  const args = [file, JSON.stringify(result.object.changes)];
+  logger.debug(result.object.changes);
 
-  await runPythonScript(pyReplace, args);
+  const response = await fetch(
+    `http://quart:5000/api/file/docx/replace/${path.basename(file)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        search: result.object.changes.map((change) => change.originalText),
+        replace: result.object.changes.map((change) => change.newText),
+      }),
+    },
+  );
+  if (response.status !== 200) {
+    fs.unlink(file);
+    fs.unlink(file.replace(".docx", "_updated.docx"));
+    return errorResponse(res, 400, "Error editing resume");
+  }
+
   return res
     .status(200)
-    .sendFile(`${file.replace(".docx", "_new.docx")}`, (error) => {
+    .sendFile(`${file.replace(".docx", "_updated.docx")}`, (error) => {
       fs.unlink(file);
-      fs.unlink(file.replace(".docx", "_new.docx"));
+      fs.unlink(file.replace(".docx", "_updated.docx"));
     });
 }

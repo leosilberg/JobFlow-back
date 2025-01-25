@@ -1,17 +1,11 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:alpine AS base
-RUN apk add --no-cache python3 py3-pip
 WORKDIR /usr/src/app
 
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM base AS install
-
-RUN python -m venv /temp/python/venv
-ENV PATH="/temp/python/venv/bin:$PATH"
-COPY requirements.txt /temp/python
-RUN cd /temp/python && pip install -r requirements.txt  --break-system-packages
 
 RUN mkdir -p /temp/dev
 COPY ./patches /temp/dev/patches
@@ -38,16 +32,16 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=install /temp/python/venv ./venv
-ENV PATH="/usr/src/app/venv/bin:$PATH"
+
 # COPY --from=prerelease /usr/src/app/src ./src
-COPY --from=prerelease /usr/src/app/dist ./dist
+COPY --from=prerelease /usr/src/app/dist .
 COPY --from=prerelease /usr/src/app/package.json .
 COPY --from=prerelease /usr/src/app/public ./public
 
 # run the app
-RUN  chown -R bun:bun ./dist/temp
+RUN mkdir -p ./temp
+RUN  chown -R bun:bun ./temp
 USER bun
 ARG PORT 
 EXPOSE ${PORT}
-ENTRYPOINT [ "bun", "run", "dist/index.js" ]
+ENTRYPOINT [ "bun", "run", "index.js" ]
