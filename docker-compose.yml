@@ -21,7 +21,7 @@ services:
   quart:
     environment:
       - PYTHONUNBUFFERED=1
-    image: ghcr.io/leosilberg/jobflow-quart-app:1.2
+    image: ghcr.io/leosilberg/jobflow-quart-app:1.3
     ports:
       - "5000:5000"
     networks:
