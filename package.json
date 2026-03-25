@@ -18,7 +18,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/mongoose": "^5.11.97",
     "@zodyac/zod-mongoose": "^3.0.0",
-    "ai": "^4.1.4",
+    "ai": "^6.0.138",
     "axios": "^1.7.7",
     "bcrypt": "5.1.0",
     "cors": "^2.8.5",
